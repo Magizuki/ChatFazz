@@ -13,14 +13,24 @@ const UserList = () => {
 
     useEffect(() => {
         setUserList([])
-        console.log('jalan')
         const docRef = query(collection(db, "users"), where('uid', '!=', userSession.uid))
         getDocs(docRef).then((result) => {
             result.forEach((element) => {
                 //console.log(element.id)
                 // console.log(userSession.uid)
                 if (userList.find((val) => val.uid == element.id) == null) {
-                    setUserList((prev) => ([...prev, element]))
+                    getDocs(query(collection(db, "chats"), where("User1_ID", "in", [element.id, userSession.uid]), where("User2_ID", "in", [element.id, userSession.uid]))).then(async(result2) => {
+                        if (!result2.empty) {
+                            result2.forEach((element2) => {
+                                if (element2.data().chatList != null) {
+                                    setUserList((prev) => ([...prev, {email: element.data().email, name: element.data().name, status: element.data().status, uid: element.data().uid, lastMessage: element2.data().chatList[element2.data().chatList.length - 1].message}]))
+                                }
+                            })
+                        }
+                        else {
+                            setUserList((prev) => ([...prev, {email: element.data().email, name: element.data().name, status: element.data().status, uid: element.data().uid, lastMessage: ""}]))
+                        }
+                    })
                 }
             })
             
@@ -76,11 +86,21 @@ const UserList = () => {
                     {
                         userList.map((item) => {
                             return(
-                                <div key={item.id} id={item.id} className="flex flex-row mb-5 cursor-pointer hover:border hover:border-gray-100 p-3" onClick={() => changeRecipientChat(item.id, item.data().name)}>
+                                <div key={item.uid} id={item.uid} className="flex flex-row mb-5 cursor-pointer hover:border hover:border-gray-100 p-3" onClick={() => changeRecipientChat(item.uid, item.name)}>
                                     <img src="/DefaultProfilePic.png" className="m-auto w-12 h-12" />
                                     <div className="flex flex-col grow ml-4">
-                                        <span className="text-white text-xl">{item.data().name}</span>
-                                        <span className="text-gray-400 text-sm mt-1">Testing 123</span>
+                                        <span className="text-white text-xl">{item.name}</span>
+                                        <span className="text-gray-400 text-sm mt-1">
+                                            {
+                                                item.lastMessage != "" 
+                                                ? (
+                                                    item.lastMessage.length > 20 
+                                                    ? item.lastMessage.substring(20) + "..."
+                                                    : item.lastMessage
+                                                ) 
+                                                : <></>
+                                            }
+                                        </span>
                                         <hr className="mt-2 border-gray-500" />
                                     </div>
                                 </div>
@@ -92,7 +112,6 @@ const UserList = () => {
             </div>
         </div>
     )
-
 }
 
 export default UserList
