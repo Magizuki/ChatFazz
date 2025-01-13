@@ -41,26 +41,13 @@ const UserList = () => {
                     return tempUserList
                 })
             }
-
-            // if (change.type === "added") {
-            //     console.log("New city: ", change.doc.data());
-            // }
-            // if (change.type === "modified") {
-            //     console.log("Modified city: ", change.doc.data());
-            // }
-            // if (change.type === "removed") {
-            //     console.log("Removed city: ", change.doc.data());
-            // }
         });  
     })
 
     useEffect(() => {
-        //setUserList([])
         const docRef = query(collection(db, "users"), where('uid', '!=', userSession.uid))
         getDocs(docRef).then((result) => {
             result.forEach((element) => {
-                //console.log(element.id)
-                // console.log(userSession.uid)
                 if (userList.find((val) => val.uid == element.id) == null) {
                     getDocs(query(collection(db, "chats"), where("User1_ID", "in", [element.id, userSession.uid]), where("User2_ID", "in", [element.id, userSession.uid]))).then(async(result2) => {
                         if (!result2.empty) {

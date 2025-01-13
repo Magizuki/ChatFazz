@@ -39,35 +39,12 @@ export const ChatDisplay = () => {
     const unsubscribeChats = onSnapshot(doc(db, 'chats', selectedChat.chatID == "" ? "dummy" : selectedChat.chatID), (doc) => {
         if (doc.exists()) {
             if (doc.data().chatList == null) return
-            // console.log(chatList.length)
-            // console.log(chatList)
             if (chatList.length == doc.data().chatList.length) return
             setChatList(doc.data().chatList)
-            
-            // if (
-            //     (doc.data().chatList[doc.data().chatList.length - 1].senderID != userSession.uid) && !doc.metadata.hasPendingWrites
-            // ) 
-            // {
-            //     if (chatList.length > 0){
-            //         if (chatList.find((val) => val.no == doc.data().chatList[doc.data().chatList.length - 1].no) != null) return
-            //     }
-            //     setChatList((prev) => [...prev, {no: doc.data().chatList[doc.data().chatList.length - 1].no,message: doc.data().chatList[doc.data().chatList.length - 1].message, senderID: doc.data().chatList[doc.data().chatList.length - 1].senderID, date: doc.data().chatList[doc.data().chatList.length - 1].date}])
-            // }
-            // else if (doc.data().chatList[doc.data().chatList.length - 1].senderID == userSession.uid && !doc.metadata.hasPendingWrites) {
-            //     if (chatList.length == 0 || (chatList.length > 0 && chatList.find((val) => val.no == doc.data().chatList[doc.data().chatList.length - 1].no) != null)) return
-            //     if (doc.data().chatList[doc.data().chatList.length - 1].no != chatList[chatList.length - 1].no) {
-            //         console.log('chat observer trigerred 2')
-            //         // console.log(chatList.find((val) => { console.log(val.no); return val.no == doc.data().chatList[doc.data().chatList.length - 1].no}))
-            //         // console.log(doc.data().chatList[doc.data().chatList.length - 1].no)
-            //         setChatList((prev) => [...prev, {no: doc.data().chatList[doc.data().chatList.length - 1].no,message: doc.data().chatList[doc.data().chatList.length - 1].message, senderID: doc.data().chatList[doc.data().chatList.length - 1].senderID, date: doc.data().chatList[doc.data().chatList.length - 1].date}])
-            //         //setChatList((prev) => [...prev, doc.data().chatList[doc.data().chatList.length - 1]])
-            //     }
-            // }
         }
     })
 
     const unsubscribeUsers = onSnapshot(doc(db, 'users', selectedChat.userRecipientID == "" ? "dummy" : selectedChat.userRecipientID), (doc) => {
-                                console.log('user observer trigerred')
                                 if(doc.exists()) {
                                     setRecepientStatus(doc.data().status)
                                 }
@@ -86,13 +63,10 @@ export const ChatDisplay = () => {
             const date = new Date()
             getDoc(docRef).then(async (result) => {
                 if (result.exists()) {
-                    console.log('send message trigerred')
-                    //setChatList((prev) => [...prev, {no: result.data().chatList.length + 1,message: message, senderID: userSession.uid, date: date}])
                     if (result.data().chatList == undefined || result.data().chatList == null) {
                         await setDoc(docRef, {chatList: [{no: 1 ,message: message, senderID: userSession.uid, date: date}]}, {merge: true})
                     }
                     else {
-                        console.log(result.data().chatList.length + 1)
                         await setDoc(docRef, {chatList: [...result.data().chatList, {no: result.data().chatList.length + 1,message: message, senderID: userSession.uid, date: date}]}, {merge: true})
                     }
                     chatContainerRef.current?.scrollTo(0, chatContainerRef.current?.scrollHeight)
@@ -104,13 +78,11 @@ export const ChatDisplay = () => {
     
     useEffect(()=> {
         if (selectedChat.chatID == "") return
-        //setChatList([])
         const docRef = doc(db, "chats", selectedChat.chatID == "" ? "dummy" : selectedChat.chatID)
         const docRef2 = doc(db, "users", selectedChat.userRecipientID == "" ? "dummy" : selectedChat.userRecipientID)
         getDoc(docRef).then((result) => {
             if (result.exists()) {
                 if(result.data().chatList != undefined && result.data().chatList != null) {
-                    console.log('use effect selected chat trigerred')
                     setChatList(result.data().chatList)
                 }
             }
@@ -164,7 +136,6 @@ export const ChatDisplay = () => {
                                 chatList.length > 0 ?
                                 chatList.map((chat, index) => { 
                                     if (chat.senderID == "") return
-                                    //console.log(chat.date.toDate())
                                     
                                     const date = chat.date.toDate().getDate()
                                     const month = chat.date.toDate().getMonth() + 1

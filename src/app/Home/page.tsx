@@ -13,7 +13,6 @@ const page = () => {
 
     const signInWithGoogle = () => {
         const provider = new GoogleAuthProvider();
-        console.log(userSession)
         if (userSession.uid != "") {
             const docRef = doc(db, "users", userSession.uid)
             setDoc(docRef, {status: 'online'}, {merge: true}).then(() => {
@@ -23,12 +22,9 @@ const page = () => {
         else {
             //await signOut(auth)
             signInWithPopup(auth, provider).then(async (result) => {
-                console.log('tes login')
                 setUserSession({uid : result.user.uid, username : result.user.displayName ? result.user.displayName : ""})
                 const docRef = doc(db, "users", result.user.uid)
                 await setDoc(docRef, {uid: result.user.uid,name: result.user.displayName ? result.user.displayName : "", email: result.user.email, status: 'online'}, {merge: true})
-                // const user = result.user.displayName
-                // console.log('User Info:', user)
                 router.replace("/Chats")
             }).catch((error) => {
                 console.error('Error during Google sign-in:', error.message)
