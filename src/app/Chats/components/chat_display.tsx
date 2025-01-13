@@ -37,12 +37,8 @@ export const ChatDisplay = () => {
     }
 
     const unsubscribeChats = onSnapshot(doc(db, 'chats', selectedChat.chatID == "" ? "dummy" : selectedChat.chatID), (doc) => {
-        console.log('chat observer trigerred')
-        console.log(chatList)
         if (doc.exists()) {
             if (doc.data().chatList == null) return
-            console.log('chat observer trigerred 1')
-            console.log(doc.data().chatList)
             // console.log(chatList.length)
             // console.log(chatList)
             if (chatList.length == doc.data().chatList.length) return
@@ -129,7 +125,6 @@ export const ChatDisplay = () => {
     },[selectedChat])
 
     useEffect(() => {
-        console.log('tes')
         window.addEventListener('beforeunload', () => {
             setDoc(doc(db, 'users', userSession.uid),{status: 'offline'}, {merge: true}).then(() => {
                 unsubscribeChats()

@@ -1,7 +1,7 @@
 'use client'
 import { useAtom } from "jotai";
 import { userAtom, selectedChatAtom } from '../../jotaiConfigs/user_atom'
-import { doc, collection, setDoc, getDocs, getDoc, query, where } from "firebase/firestore"
+import { doc, collection, setDoc, getDocs, getDoc, query, where, onSnapshot } from "firebase/firestore"
 import { db } from '../../../../firebase'
 import { useEffect, useState } from "react";
 
@@ -11,8 +11,51 @@ const UserList = () => {
     const [selectedChat, setSelectedChat] = useAtom(selectedChatAtom)
     const [userList, setUserList] = useState<any[]>([])
 
+    const unsubscribeChats = onSnapshot(query(collection(db, "chats")), (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+            if (change.doc.data().User1_ID == userSession.uid || change.doc.data().User2_ID == userSession.uid) {
+                // var idx:number = -1
+                // if (change.doc.data().User1_ID == userSession.uid) {
+                //     idx = userList.findIndex((val) => val.uid == change.doc.data().User2_ID)
+                // }
+                // else {
+                //     idx = userList.findIndex((val) => val.uid == change.doc.data().User1_ID)
+                // }
+
+                // if(idx == -1) return
+                // if (userList[idx].lastMessage == change.doc.data().chatList[change.doc.data().chatList.length - 1].message) return
+                //tempUserList[idx].lastMessage = change.doc.data().chatList[change.doc.data().chatList.length - 1].message
+                setUserList((prev) => {
+                    var idx:number = -1
+                    if (change.doc.data().User1_ID == userSession.uid) {
+                        idx = userList.findIndex((val) => val.uid == change.doc.data().User2_ID)
+                    }
+                    else {
+                        idx = userList.findIndex((val) => val.uid == change.doc.data().User1_ID)
+                    }
+
+                    if(idx == -1) return prev
+                    if (userList[idx].lastMessage == change.doc.data().chatList[change.doc.data().chatList.length - 1].message) return prev
+                    const tempUserList = [...prev]
+                    tempUserList[idx] = {...tempUserList[idx], lastMessage: change.doc.data().chatList[change.doc.data().chatList.length - 1].message}
+                    return tempUserList
+                })
+            }
+
+            // if (change.type === "added") {
+            //     console.log("New city: ", change.doc.data());
+            // }
+            // if (change.type === "modified") {
+            //     console.log("Modified city: ", change.doc.data());
+            // }
+            // if (change.type === "removed") {
+            //     console.log("Removed city: ", change.doc.data());
+            // }
+        });  
+    })
+
     useEffect(() => {
-        setUserList([])
+        //setUserList([])
         const docRef = query(collection(db, "users"), where('uid', '!=', userSession.uid))
         getDocs(docRef).then((result) => {
             result.forEach((element) => {
@@ -37,8 +80,15 @@ const UserList = () => {
         })
     }, [])
 
+    useEffect(() => {
+            window.addEventListener('beforeunload', () => {
+                setDoc(doc(db, 'users', userSession.uid),{status: 'offline'}, {merge: true}).then(() => {
+                    unsubscribeChats()
+                })
+            })
+        }, [])
+
     const changeRecipientChat = async (userRecipientID : string, userRecipientName : string) => {
-        console.log(userRecipientID)
         getDocs(query(collection(db, "chats"), where("User1_ID", "in", [userRecipientID, userSession.uid]), where("User2_ID", "in", [userRecipientID, userSession.uid]))).then(async(result) => {
             if (result.empty) {
                 const docRef = doc(collection(db, "chats"))
