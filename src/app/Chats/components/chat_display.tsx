@@ -17,6 +17,7 @@ export const ChatDisplay = () => {
     const inputRef = useRef<HTMLTextAreaElement>(null)
     const containerRef = useRef<HTMLObjectElement>(null)
     const chatContainerRef = useRef<HTMLObjectElement>(null)
+    const prevChatValuesRef = useRef({selectedChat, chatList})
 
     const resizeTextArea = () => {
         if (inputRef.current != null && containerRef.current != null) {
@@ -97,6 +98,16 @@ export const ChatDisplay = () => {
     },[selectedChat])
 
     useEffect(() => {
+        console.log('jalan 1')
+        if (prevChatValuesRef.current.selectedChat !== selectedChat && prevChatValuesRef.current.chatList !== chatList) {
+            console.log('jalan 2')
+            chatContainerRef.current?.scrollTo(0, chatContainerRef.current?.scrollHeight)
+            prevChatValuesRef.current = {selectedChat, chatList}
+        }
+
+    }, [selectedChat, chatList])
+
+    useEffect(() => {
         window.addEventListener('beforeunload', () => {
             setDoc(doc(db, 'users', userSession.uid),{status: 'offline'}, {merge: true}).then(() => {
                 unsubscribeChats()
@@ -145,17 +156,17 @@ export const ChatDisplay = () => {
 
                                     if (chat.senderID == userSession.uid) {
                                         return (
-                                            <div key={chat.no} className="flex flex-col max-w-96 self-end bg-green-900 rounded-lg p-3 m-2">
-                                                <span className="text-white">{chat.message}</span>
-                                                <div className="self-end"><span className="text-gray-400 text-sm">{date + '/' + month + '/' + year + ' ' + hour + ':' + minute}</span></div>
+                                            <div key={chat.no} className="flex flex-col max-w-96 self-end bg-green-900 rounded-lg p-3 m-2 break-words">
+                                                <span className="text-white text-wrap">{chat.message}</span>
+                                                <div className="self-end"><span className="text-gray-400 text-sm">{(date < 10 ? '0' + date : date) + '/' + (month < 10 ? '0' + month : month) + '/' + year + ' ' + (hour < 10 ? '0' + hour : hour) + ':' + (minute < 10 ? '0' + minute : minute)}</span></div>
                                             </div>
                                         )
                                     }
                                     else {
                                         return (
-                                            <div key={chat.no} className="flex flex-col max-w-96 self-start bg-[#171f24] rounded-lg p-3 m-2">
+                                            <div key={chat.no} className="flex flex-col max-w-96 self-start bg-[#171f24] rounded-lg p-3 m-2 break-words">
                                                 <span className="text-white">{chat.message}</span>
-                                                <div className="self-end"><span className="text-gray-400 text-sm">{date + '/' + month + '/' + year + ' ' + hour + ':' + minute}</span></div>
+                                                <div className="self-end"><span className="text-gray-400 text-sm">{(date < 10 ? '0' + date : date) + '/' + (month < 10 ? '0' + month : month) + '/' + year + ' ' + (hour < 10 ? '0' + hour : hour) + ':' + (minute < 10 ? '0' + minute : minute)}</span></div>
                                             </div>
                                         )
                                     }   

@@ -20,7 +20,6 @@ const page = () => {
             })
         }
         else {
-            //await signOut(auth)
             signInWithPopup(auth, provider).then(async (result) => {
                 setUserSession({uid : result.user.uid, username : result.user.displayName ? result.user.displayName : ""})
                 const docRef = doc(db, "users", result.user.uid)

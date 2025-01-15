@@ -123,7 +123,7 @@ const UserList = () => {
                     {
                         userList.map((item) => {
                             return(
-                                <div key={item.uid} id={item.uid} className="flex flex-row mb-5 cursor-pointer hover:border hover:border-gray-100 p-3" onClick={() => changeRecipientChat(item.uid, item.name)}>
+                                <div key={item.uid} id={item.uid} className="flex flex-row mb-5 cursor-pointer rounded-md hover:border hover:border-gray-100 p-3" onClick={() => changeRecipientChat(item.uid, item.name)}>
                                     <img src="/DefaultProfilePic.png" className="m-auto w-12 h-12" />
                                     <div className="flex flex-col grow ml-4">
                                         <span className="text-white text-xl">{item.name}</span>
@@ -132,7 +132,7 @@ const UserList = () => {
                                                 item.lastMessage != "" 
                                                 ? (
                                                     item.lastMessage.length > 20 
-                                                    ? item.lastMessage.substring(20) + "..."
+                                                    ? item.lastMessage.substring(0, 25) + "..."
                                                     : item.lastMessage
                                                 ) 
                                                 : <></>
